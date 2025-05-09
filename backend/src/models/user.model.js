@@ -4,31 +4,39 @@ const userSchema = new mongoose.Schema({
 
     email: {
         type: String,
-        required: true,
+        required: [true,"Email is required"],
         unique: true,
+        trim: true,
+        match: [/\S+@\S+\.\S+/ , 'Please fill a valid email address' ],
     },
+
     fullName: {
         type: String,
-        required: true,
-        minlength: 3,
-        maxlength: 50
+        required: [true,"User name is required"],
+        minLength: 3,
+        maxLength: 50,
+        trim: true,
     },
+
     password: {
         type: String,
-        required: true,
-        minlength: 6
+        required: [true,"Password is required"],
+        minLength:6,
     },
-    gender: {
-        type: String,
-        enum: ['male', 'female'],
-        required: true
-    },
+
     profilePic: {
         type: String,
         default: ''
     }
     
 }, { timestamps: true });
+
+userSchema.pre('save', function (next) {
+    if (this.isModified('email')) {
+        this.email = this.email.toLowerCase();
+    }
+    next();
+});
 
 const User = mongoose.model('User', userSchema);
 
