@@ -22,7 +22,7 @@ export const authorize = async (req,res,next) => {
     
    } catch (error) {
     console.log("Error in authorize middleware", error.message);
-    next(err);
+    next(error);
    }
 
 }
