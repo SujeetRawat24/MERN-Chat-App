@@ -14,13 +14,22 @@ const PORT = process.env.PORT || 5001;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser);
+app.use(cookieParser());
 
 app.use('/api/auth/', authRoutes);
 
 app.use(errorHandler );
 
-app.listen(PORT, ()=> {
-console.log(`Server running on http://localhost:${PORT}`);
-connectDB();
-})
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+};
+
+startServer();
