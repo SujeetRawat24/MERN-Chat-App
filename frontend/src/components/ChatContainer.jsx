@@ -1,5 +1,5 @@
 import { useChatStore } from "../store/useChatStore";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import ChatHeader from "../components/ChatHeader";
 import MessageInput from "../components/MessageInput";
@@ -8,12 +8,24 @@ import { useAuthStore } from "../store/useAuthStore";
 import formatMessageTime from "../lib/utils";
  
 const ChatContainer = () => {
-  const { messages, getMessages, isMessagesLoading, selectedUser} = useChatStore();
+  const { messages, getMessages, isMessagesLoading, selectedUser, subscribeToMessages, unsubscribeFromMessages } = useChatStore();
   const { authUser } = useAuthStore();
+  const messageEndRef = useRef(null);
 
   useEffect(() => {
-    getMessages(selectedUser._id)
-  },[selectedUser._id, getMessages]);
+    getMessages(selectedUser._id);
+
+    subscribeToMessages();
+
+    return () => unsubscribeFromMessages();
+  },[selectedUser._id, getMessages, subscribeToMessages , unsubscribeFromMessages]);
+
+  //Scroll down effect whenever a new message appeared 
+  useEffect(() => {
+    if(messageEndRef.current && messages ){
+      messageEndRef.current.scrollIntoView({behaviour:"smooth"});
+    }
+  },[messages])
 
   if(isMessagesLoading) {
     return (
@@ -36,6 +48,7 @@ const ChatContainer = () => {
           key={message._id}
 
           className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`} 
+          ref={messageEndRef}
           >
 
             <div className="chat-image avatar">
